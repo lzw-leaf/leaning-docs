@@ -4,8 +4,6 @@
 
 > 前置条件：需要按照 git
 
-    
-
 从github的镜像库上克隆源码到 ~/.nvm
 
     git clone https://github.com/nvm-sh/nvm.git  ~/.nvm
