@@ -6,7 +6,7 @@
 
 从github的镜像库上克隆源码到 ~/.nvm
 
-    git clone https://github.com/nvm-sh/nvm.git  ~/.nvm
+    git clone git://github.com/nvm-sh/nvm.git  ~/.nvm
 
 检测分支和最新版本
 
@@ -14,6 +14,8 @@
 
 将环境变量写入~/bashrc文件
 
+    
+    # nvm
     export NVM_DIR="$HOME/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
