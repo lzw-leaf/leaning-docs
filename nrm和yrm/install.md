@@ -19,3 +19,7 @@ npm全局安装
 测试指定源的响应时间 | nrm test
 添加指定源 | nrm add [alias] [url]
 删除指定源 | nrm del [alias] [url]
+
+## yrm
+
+与nrm语法一致的用于yarn的镜像源替换依赖
