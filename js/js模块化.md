@@ -9,6 +9,7 @@
 * [IIFE](https://developer.mozilla.org/zh-CN/docs/Glossary/IIFE)——立刻执行函数返回对象的方式来实现模块化
 * [CommonJS](https://zh.wikipedia.org/wiki/CommonJS) — 为 Node.js 创建的服务端模块化规范。
 * [AMD](https://en.wikipedia.org/wiki/Asynchronous_module_definition)——早期的浏览器模块化规范
+* [CMD](https://github.com/seajs/seajs)——基于AMD规范优化调整的规范
 * [UMD](https://github.com/umdjs/umd) — 另外一个模块化方案，严格意义上他不是一个规范而是让 AMD 和 CommonJS 兼容的一个方案。
 
 ## 社区的各种实践
@@ -88,6 +89,16 @@ var module1 = (function() {
 })();
 ```
 
+#### webpack默认的打包内容就是IIFE模式
+
+**打包前**
+
+![打包前](./image/0.jpg)
+
+**打包后**
+
+![打包后](./image/1.jpg)
+
 利用闭包就是早期avascript模块的基本写法。下面，再对这种写法进行加工。
 
 ### 放大模式（augmentation）
@@ -151,13 +162,64 @@ var module1 = (function($, wx) {
 })(jQuery, wx);
 ```
 
+## CommonJS
+
+借用维基百科的话———CommonJS是一个项目，其目标是为JavaScript在网页浏览器之外创建模块约定。创建这个项目的主要原因是当时缺乏普遍可接受形式的JavaScript脚本模块单元，模块在与运行JavaScript脚本的常规网页浏览器所提供的不同的环境下可以重复使用。
+该规范最早是用在node.js中的，它定义了四个重要的全局环境变量： `module、exports、require、global` 。其中 `module` 、 `exports` 、 `require` 提供了模块化的相关链路。
+
+### module 和 exports (模块定义)
+
+> 要注意的是 `exports` 其实是对 `module.exports` 的引用，可以理解为子模块顶部书写了 `exports = module.exports` 。不过一般为了通用性。广泛都采用 `module.exports` 做模块导出。
+
+`语法` : module.exports = {a:xxx, b:xxx}
+
+由于**module.exports本身是个对象**，所以写成以下也是可以的
+
+``` js
+module.exports.a = XXX
+exports.a = XXX
+```
+
+但是写成下面这样是不行的
+
+``` js
+// 前文提过export是module.exports的引用，写成下面这样会改变引用。导致exports失去原有功能
+exports = {
+    a: xxx,
+    b: xxx
+}
+```
+
+### require(模块引用)
+
+`语法` : xxx = require('moudleName')
+
+在 `node.js` 中，require是使用同步的方式加载模块。那是因为在服务端，模块文件都窜在本地，读取快。不会出现问题。但在浏览器端，限于网络原因，如果同步会致使页面长时间卡顿，不够契合brower端的模块加载，不过为方便可统一书写，并通过相关转移工具(webpack等)继续转义
+
+例子：
+
+``` js
+// index.js
+const utils = require('./utils')
+const el = document.createElement('div')
+el.innerHTML = utils.sayHello('Hello', 'Webpack')
+document.body.appendChild(el)
+
+// utils.js
+module.exports = {
+    sayHello: function(a, b) {
+        return a + b
+    }
+}
+```
+
 ## AMD
 
-AMD是"Asynchronous Module Definition"的缩写，意思就是"异步模块定义"。它采用异步方式加载模块，模块的加载不影响它后面语句的运行。所有依赖这个模块的语句，都定义在一个回调函数中，等到加载完成之后，这个回调函数才会运行。他是[requirejs](https://requirejs.org/)在推广过程中对模块定义的规范化产出。
+`AMD` 是"Asynchronous Module Definition"的缩写，意思就是"异步模块定义"。它采用异步方式加载模块，模块的加载不影响它后面语句的运行。所有依赖这个模块的语句，都定义在一个回调函数中，等到加载完成之后，这个回调函数才会运行。他是[requirejs](https://requirejs.org/)在推广过程中对模块定义的规范化产出。需要注意的是 `AMD` 是一种模块定义的规范， `requirejs` 是实现这个规范的一种解决方案，两者不能混为一谈。例如 `r.js` 也是 `AMD` 规范的一个解决方案。webpack也有自己的实现。
 
 ### define函数(模块定义)
 
-`语法` ：define([module], callback)
+`语法` ：define([module1, module2, ...], callback(module1, moduel2, ...))
 
 ### require函数(模块引用)
 
@@ -184,4 +246,36 @@ define(['math'], function($) {
 require(['math'], function(math) {
     math.add(2, 3);
 });
+```
+
+## CMD
+
+`CMD` 即Common Module Definition通用模块定义， `CMD` 规范是国内发展出来的，借鉴了 `CommonJS` 和 `AMD` 并调整优化的一个规范方案，是 `Sea.js` 在推广过程中对模块定义的规范化产出。
+要想很好的使用需要引入 `sea.js` .
+
+> `AMD` 推崇依赖前置、提前执行， `CMD` 推崇依赖就近、延迟执行。
+
+### define (模块定义)
+
+`语法` ：define(callback(require, exports, module))
+
+### require(模块内部引用)、seaJs.use (外部引入)
+
+`语法` ：require(moudleName)
+
+``` js
+// index.js
+seajs.use(['./utils'], function(utils) {
+    const el = document.createElement('div')
+    el.innerHTML = utils.sayHello('Hello', 'Webpack')
+    document.body.appendChild(el)
+});
+
+// utils.js
+define(function(require, exports, module) {
+    const sayHello = function(a, b) {
+        return a + b
+    }
+    exports.sayHello = sayHello
+})
 ```
